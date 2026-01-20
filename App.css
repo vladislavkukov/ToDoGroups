@@ -1,0 +1,147 @@
+
+.overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.103);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index:10;
+
+}
+
+
+.modal {
+  background-color: rgb(185, 236, 227);
+  margin: 20% auto;
+  padding: 30px;
+  border: 8px solid rgba(13, 82, 72, 0.411);
+  width: 40%;
+  cursor: auto;
+  border-radius: 22px;
+  align-items: center;
+}
+
+button.front{
+  background-color: rgb(34, 124, 128);
+  border:none;
+  padding: 30px 80px;
+  font-size: 60px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 12px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+button.front:hover {
+  background-color: rgb(27, 95, 99);
+  transform: scale(1.1);
+}
+
+button.close {
+  background-color: transparent;
+  border: none;
+  float: right;
+  padding: 5px 10px;
+  cursor: pointer; 
+  font-size: 25px;
+  border-radius: 25px;
+  transition: background-color 0.3s ease
+}
+
+button.close:hover {
+  background-color: rgba(167, 1, 1, 0.644);
+}
+
+.inputField {
+  background-color: rgb(243, 248, 250);
+  padding: 10px;
+  width: 80%;
+  margin: 5px 0;
+  float: center;
+  border: 0px solid black;
+  border-radius: 10px;
+  transition: transform 0.3s ease
+
+}
+
+.inputField:focus {
+  background-color: rgb(229, 248, 255);
+  border: 1px solid black;
+  padding: 8px;
+  outline: none;
+}
+
+h2 {
+  font-family: Tahoma, sans-serif;
+}
+
+label {
+  font-family: Tahoma, sans-serif;
+}
+
+
+button.submitB {
+  background-color: rgb(34, 124, 128);
+  border:none;
+  color:white;
+  padding: 2% 10%;
+  font-size: 200%;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 10px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+button.submitB:hover {
+  background-color: rgb(27, 95, 99);
+  transform: scale(1.05);
+}
+
+.login {
+  background-color: rgb(164, 211, 203);
+  padding: 10px;
+  border-radius: 10px;
+  width: 45%;
+  float: left
+}
+
+.third {
+  padding: 10px;
+  border-radius: 10px;
+  width: 45%;
+  float: right;
+}
+
+button.google {
+  background-image: linear-gradient(to right, #DB4437 0%, #0F9D58 25%, #F4B400 50%, #4285F4 75%); 
+  border:none;
+  color:rgb(215, 195, 195);
+  padding: 2% 10%;
+  font-family: 'Roboto', sans-serif;
+  font-size: 175%;
+  width: 100%;
+  aspect-ratio: 4/1;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 10px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+h3 {
+font-size: 150%;
+color:rgb(108, 107, 107);
+font-family: 'Roboto', sans-serif;
+
+
+}
+
+img.google {
+  margin: 5px;
+  max-width: 20%;
+}

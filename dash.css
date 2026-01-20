@@ -1,0 +1,69 @@
+.modal {
+  background-color: rgb(185, 236, 227);
+  margin: 2% auto;
+  padding: 30px;
+  border: 8px solid rgba(13, 82, 72, 0.411);
+  width: 40%;
+  cursor: auto;
+  border-radius: 22px;
+  align-items: center;
+  z-index: 10;
+}
+
+.overlay {
+  position: fixed;
+  display: none;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background-color: rgba(0, 0, 0, 0.103);
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index:10;
+}
+
+button.submitB {
+  background-color: rgb(34, 124, 128);
+  border:none;
+  color:white;
+  padding: 2% 10%;
+  font-size: 200%;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 10px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+button.submitB:hover {
+  background-color: rgb(27, 95, 99);
+  transform: scale(1.05);
+}
+
+button.closeB {
+  background-color: rgb(192, 79, 79);
+  border:none;
+  color:white;
+  padding: 2% 10%;
+  font-size: 200%;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 10px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+button.closeB:hover {
+  background-color: rgb(157, 54, 54);
+  transform: scale(1.05);
+}
+
+h2 {
+  font-family: Tahoma, sans-serif;
+}
+
+.checkButtons {
+    display : flex; 
+    justify-content: center;
+}
