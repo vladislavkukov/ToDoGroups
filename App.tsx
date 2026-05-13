@@ -5,8 +5,6 @@ import Home from './home.tsx'
 import {auth} from "./firebase";
 
 
-
-
 function App() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +19,7 @@ function App() {
 
 if (loading) return <p>loading</p>
 
-return user ? <Dash/> : <Home setUser={setUser}/>  
+return user ? <Dash user={user} setUser = {setUser}/> : <Home setUser={setUser}/>  
 }
 
 export default App

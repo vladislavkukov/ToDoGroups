@@ -67,3 +67,72 @@ h2 {
     display : flex; 
     justify-content: center;
 }
+
+h3 {
+  white-space: pre-line;
+}
+
+li {
+  white-space: pre-line;
+}
+
+.welcome {
+  text-align: center;
+  margin-top: 16px;
+
+}
+
+.points {
+  text-align: left;
+  font-family: Tahoma, sans-serif;
+
+}
+
+button.topB {
+  border:none;
+  color:white;
+  padding: 1% 1.5%;
+  font-size: 100%;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 5px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+.cu {
+  background-color: rgb(67, 111, 147);
+}
+
+.logout {
+  background-color: rgb(190, 62, 62);
+}
+
+.groups {
+  background-color: rgba(109, 184, 79, 0.763);
+}
+
+.form {
+  text-align: center;
+}
+
+.params {
+  display: flex;
+  gap: 10%;
+}
+
+.goalarea {
+  resize:none;
+  width: 60%;
+  height: 25px;
+  font-size: 20px;
+  padding:10px;
+  border: 1px solid rgb(182, 209, 159);
+  border-radius: 5px;
+  background-color: rgb(219, 231, 201);
+}
+
+.goalarea:focus {
+  border: 1px solid rgb(113, 183, 113);
+  border-radius: 5px;
+
+}

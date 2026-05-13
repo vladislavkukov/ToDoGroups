@@ -1,23 +1,72 @@
 import './dash.css';
 import {auth, db} from "./firebase";
+import Groups from "./groups"
 import { useEffect, useState, type FormEvent, type ChangeEvent, use } from 'react';
-import { addDoc, collection, onSnapshot, query, where, orderBy, doc, deleteDoc, getDoc, setDoc, updateDoc, increment, arrayRemove, arrayUnion} from "firebase/firestore";
-import { onAuthStateChanged } from "firebase/auth";
+import { addDoc, collection, onSnapshot, query, where, orderBy, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc, increment, arrayRemove, arrayUnion, Timestamp} from "firebase/firestore";
+import { signOut, updateProfile } from "firebase/auth";
 
 
 
+function Dash({user, setUser}: {user:any, setUser:any}) {
+    const [points, setPoints] = useState<number|null>(null);
+    const [page, setPage] = useState(localStorage.getItem("page") as "dash"|"groups" ||"dash");
+    const [userChange, setUserChange] = useState(false)
+    const [newName, setNewName] = useState("")
+    const [userError, setUserError] = useState("")
+    const changePage = (newP : "dash"|"groups") => {
+        setPage(newP)
+        localStorage.setItem("page", newP);
+    }
+    const handleLogOut = async () => {
+        setUser(null);
+        await signOut(auth);
+    }
 
-function Dash() {
-    const [user, setUser] = useState(auth.currentUser);
-    useEffect(() => {
-    const unsub = onAuthStateChanged(auth, current => setUser(current));
-    return unsub;
-    }, []);
+    const handleNameChange = async () => {
+        setUserError("");
+          const nameCheck = query(collection(db, "userInfo"), where("username", "==", newName));
+          const duplicate = await getDocs(nameCheck);
+          if (!duplicate.empty) {
+            setUserError("Username Taken")
+            return;
+          }
+          await updateDoc(doc(db, "userInfo", user.uid), {
+            username: newName
+          })
+          await updateProfile(user, {displayName: newName})
+          
+          setUserError("Username Changed!")
+    }
+    
     if (user === undefined) return <p>Loading...</p>;
+
     return (
         <div className="">
+            {page === "dash" && ( <>
+            <button className='topB logout' onClick={handleLogOut}>Log out</button>
+            <button className='topB groups' onClick={()=> changePage("groups")}>Groups</button>
+            <button className='topB cu' onClick={()=> setUserChange(true)}>Change Username</button>
+            <UserInfo user = {user} points = {points} setPoints = {setPoints}/>
             <GoalForm user = {user}/>
-            <Feed user = {user}/>
+            <Feed user = {user} points = {points} setPoints = {setPoints}/>
+            </>
+            )}
+
+            {page === "groups" && (<>
+                <Groups changePage={changePage} user = {user}/>
+            </>)
+            }
+
+            {userChange && (<div className = "overlay" onClick={() => setUserChange(false)}>
+                <div className='modal' onClick = {(e) => e.stopPropagation()}>
+                    <h2>New username: </h2>
+                    <input value = {newName} onChange={(e) => setNewName(e.target.value)}/>
+                    <button onClick={() => handleNameChange()}>Confirm</button>
+                    <p>{userError}</p>
+                    </div>
+                </div>)}
+
+
         </div>
     )
 }
@@ -29,42 +78,79 @@ type GoalMap = {
 
 const today = toLocal(new Date());
 
+function UserInfo ({user, points, setPoints} : {user:any, points:number|null, setPoints:React.Dispatch<React.SetStateAction<number|null>>}){
+    useEffect(() => { 
+        const getUser = async () => {
+            const a = doc(db, "userInfo", user.uid);
+            const b = await getDoc(a);
+            if (b.exists()){
+            setPoints(b.data().points)}
+        }
+        getUser();
+    },
+    [user]
+)
 
-function Feed({user} : {user:any}){
+
+    return (
+        <>
+        <h4 className='points'>Your points: {points} </h4>
+        <h3 className='welcome'>Welcome {user.displayName}</h3>
+        </>
+    )
+}
+
+
+function Feed({user, points, setPoints} : {user:any, points:number|null, setPoints:React.Dispatch<React.SetStateAction<number|null>>}){
 
     const [Selection, changeSelection] = useState('0')
+    const [postGroup, changePostGroup] = useState<string>("");
 
-    const handleDelete = async (id: string) => {
-        await deleteDoc(doc(db, "goal", id));
+    const handleDelete = async (id: string, typeDel: string) => {
+        await deleteDoc(doc(db, typeDel, id));
         setGoals(prev => prev.filter(goal => goal.id !== id));
         setDelGoal(null);
     }
 
     const handleComplete = async (id: string, end: Date, current: string, change: string) => {
         const date = new Date(current);
+        const fireDate = Timestamp.fromDate(date);
         const ogCol = doc(db, "goal", id);
         const goalD = await getDoc(ogCol);
         const newLength = goalD.data()!.toDo.length - 1;
+        const a = doc(db, "userInfo", user.uid);
         
-
         if (change === "c") {
+            setPoints(points => (points ?? 0) +1)
+
+            await updateDoc(a, {
+            points: increment(1)
+            }
+        )
             await updateDoc(ogCol, {
-                toDo: arrayRemove(date),
-                done: arrayUnion(date)
+                toDo: arrayRemove(fireDate),
+                done: arrayUnion(fireDate)
             });
         }
 
         else {
+            setPoints(points => (points ?? 0) -1)
+            await updateDoc(a, {
+            points: increment(-1)
+            }
+            )
+            
             await updateDoc(ogCol, {
-                toDo: arrayRemove(date),
-                failed: arrayUnion(date)
+                toDo: arrayRemove(fireDate),
+                failed: arrayUnion(fireDate)
             });
         }
         
         if (newLength === 0) {
             const goal = await getDoc(ogCol);
             const newCol = doc(db, "compGoal", id);
-            await setDoc(newCol, goal.data());
+            await setDoc(newCol, {...goal.data(), 
+                pointsEarned: (goal.data()?.done.length ??0) - (goal.data()?.failed.length ??0)});
             await deleteDoc(ogCol);
         }
     }
@@ -73,8 +159,48 @@ function Feed({user} : {user:any}){
     const handleChange = (e: ChangeEvent<HTMLSelectElement>) => {
         changeSelection(e.target.value);
     }
+    const handleFilter = (e: ChangeEvent<HTMLSelectElement>) => {
+        setFilterLen(e.target.value as "most"|"recent");
+    }
+    const handlePostP = (e: ChangeEvent<HTMLSelectElement>) => {
+        changePostGroup(e.target.value);
+    }
+    const handlePost = async (message: string, groupId:string) => {
+        await addDoc(collection(db, "group", groupId, "posts"), {
+           content: "I've completed " + message,
+           date: toLocal(new Date()),
+           likeIds: [],
+           userId: user.uid,
+           username: user.displayName
+        })
+        await updateDoc(doc(db, "group", groupId), {
+            popCount: increment(1)
+        })
+    }
 
+    const [groupL, setGroupL] = useState<Groups[]>([]);
+    
+
+    const [userGroups, setUserGroups] = useState<string[]>([])
+
+    useEffect(() => {
+        const load = async () => {
+        const groups = await getDocs(collection(db, "group"));
+        const groupList: Groups[] = groups.docs.map(docu =>
+        ({id: docu.id, ... (docu.data() as Omit<Groups, "id">)}));
+        setGroupL(groupList)
+        const infoDoc = doc(db, "userInfo", user.uid);
+        const getDocc = await getDoc(infoDoc);
+        const gList = getDocc.get("joinedGroups");
+        setUserGroups(gList);
+    
+    };
+        load();
+    }, [])
+
+    const [shareGoal, setShareGoal] = useState<string|null>(null)
     const [delGoal, setDelGoal] = useState<string|null>(null);
+    const [filterLen, setFilterLen] = useState<"most"|"recent">("recent");
 
     if (!user?.uid) return;
     const [goals, setGoals] = useState<Goals[]>([]);
@@ -167,7 +293,7 @@ function Feed({user} : {user:any}){
                 <div className='modal' onClick = {(e) => e.stopPropagation()}>
                     <h2> Are you sure you want to delete the goal: {goal.goal}</h2>
                     <div className = "checkButtons">
-                    <button className = 'submitB' onClick = {() => handleDelete(goal.id!)}>Confirm</button>
+                    <button className = 'submitB' onClick = {() => handleDelete(goal.id!, "goal")}>Confirm</button>
                     <button className = 'closeB' type='button' onClick={() => setDelGoal(null)}>Cancel</button>
                     </div>
                     </div>
@@ -220,49 +346,85 @@ function Feed({user} : {user:any}){
             <h2> Completed Goals </h2>
            {compGoals.length === 0 ? (
                 <h4>No Goals Yet</h4>
-            ) : (
+            ) : (<>
+                 <select value = {filterLen} onChange={handleFilter}>
+                    <option value = "recent">Most Recent</option>
+                    <option value = "most">Most Points Earned</option>
+                </select>
                 <ul>
-                {compGoals.map(goal => {
+                {compGoals.slice().sort((a,b) =>{
+                    if (filterLen === "recent") {
+                        return b.end.getTime() - a.end.getTime();
+                    }
+                    else {
+                        return b.pointsEarned! - a.pointsEarned!
+                    }
+                }
+                ).slice(0,5).map(goal => {
                     let message = ``
                     switch (goal.frequency){
                         case "Once":
-                            message = `Goal: ${goal.goal} once`;
+                            message = `${goal.goal} once`;
                             break;
                         case "Daily":
-                            message = `Goal: ${goal.goal} Daily for ${goal.done.length+goal.failed.length} Days with a ${Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}% success rate`;
+                            message = `${goal.goal} daily\n Length: ${goal.done.length+goal.failed.length} days \n Success rate: ${Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}%`;
                             break;
                         case "Weekly":
-                            message = `Goal: ${goal.goal} Weekly for ${goal.done.length+goal.failed.length} Weeks with a ${Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}% success rate`;
+                            message = `${goal.goal} weekly \n Length: ${goal.done.length+goal.failed.length} weeks \n Success rate: ${Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}%`;
                             break;
                         case "Monthly":
-                            message = `Goal: ${goal.goal} Monthly for ${goal.done.length+goal.failed.length} Months with a ${Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}% success rate`;
+                            message = `${goal.goal} monthly \n Length: ${goal.done.length+goal.failed.length} months \n Success rate: ${Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}%`;
                             break;
                     }
                 return ( <div>
-                <li key = {goal.id}  style={{ whiteSpace: 'pre-line' }}> {message}</li> 
-                <p>{Math.round((goal.done.length + goal.failed.length)*100/(goal.toDo.length +goal.done.length + goal.failed.length))}% complete </p>
-                <p>{Math.round((goal.done.length)*100/(goal.done.length + goal.failed.length))}% success rate so far </p>
+                <li key = {goal.id}  style={{ whiteSpace: 'pre-line' }}> Goal: {message}</li> 
+                <p>Points Earned: {goal.pointsEarned}</p>
                 <button onClick = {() => setDelGoal(goal.id!)}>Clear</button>
+                <button onClick = {() => setShareGoal(goal.id!)}>Share</button>
                 {delGoal === goal.id && (
                 <div className = "overlay" onClick={() => setDelGoal(null)}>
-                <div className='modal' onClick = {(e) => e.stopPropagation()}>
-                    <h2> Are you sure you want to delete the goal: {goal.goal}</h2>
+                <div className="modal" onClick = {(e) => e.stopPropagation()}>
+                    <h2> Are you sure you want to clear the goal: {goal.goal}</h2>
                     <div className = "checkButtons">
-                    <button className = 'submitB' onClick = {() => handleDelete(goal.id!)}>Confirm</button>
+                    <button className = 'submitB' onClick = {() => handleDelete(goal.id!, "compGoal")}>Confirm</button>
                     <button className = 'closeB' type='button' onClick={() => setDelGoal(null)}>Cancel</button>
                     </div>
                     </div>
                 </div>
+                
     )}
+                {shareGoal === goal.id && (
+                <div className = "overlay" onClick={() => setShareGoal(null)}>
+                <div className="modal" onClick = {(e) => e.stopPropagation()}>
+                    <h2>Which group would you like to share this in: </h2>
+                    <select value = {postGroup} onChange={handlePostP}> {userGroups.map(groupId => {
+                        const group = groupL.find(g => g.id === groupId);
+                        return (
+                            <option key ={groupId} value = {groupId}>
+                                {group?.name ?? groupId}
+                            </option>
+                        )
+                     }
+                     )
+                     } </select>
+                     <h3>Your post: <br/>I've completed {message} <br/></h3>
+                    <button onClick={() => handlePost(message, postGroup)}>Post</button>
+
+                     
+                </div>
+                </div>
+                )}
                 </div>
 
             );
         })}
         </ul>
+        </>
             )}
             
         </div>
         </div>
+        
     )
 }
 
@@ -277,6 +439,7 @@ interface Goals {
     toDo: Date[];
     done: Date[];
     failed: Date[];
+    pointsEarned?: number;
 }
 
 function GoalForm({user} : {user:any}) {
@@ -314,7 +477,7 @@ function GoalForm({user} : {user:any}) {
     const handleSubmit = async (e: FormEvent) => {
         if (!user){
         setError("You need to be signed in")
-        }   
+        }
         setConfirm(false);
         e.preventDefault();
         if (!goalData.goal || !goalData.end || !goalData.frequency || !goalData.start){
@@ -360,13 +523,13 @@ function GoalForm({user} : {user:any}) {
     return (
         <form onSubmit={handleSubmit}>
             {error && <p style ={{color:"red"}}> {error}</p>}
-
-            <div>
-                <label> What is Your Goal? <br/>
-                <textarea name = "goal" value = {goalData.goal} onChange = {handleChange}/>  
+            <div className='form'>
+                <label> Create a new goal today! <br/>
+                <textarea className="goalarea"name = "goal" value = {goalData.goal} onChange = {handleChange}/>  
                 </label>
             </div>
             <br/>
+            <div className='params'>
             <div>
                 <label> How often are you planning to meet this goal? <br/>
                 <select name = "frequency" value = {goalData.frequency} onChange={handleChange}>
@@ -387,6 +550,7 @@ function GoalForm({user} : {user:any}) {
                     <input type = "date" name = "end" value = {toLocal(goalData.end).toLocaleDateString()} min = {toLocal(goalData.start).toLocaleDateString()} onChange = {handleChange} />
                 </label>
                 )}
+                </div>
             </div>
             <br/>
             <button type='button' onClick={() => setConfirm(true)}>Set my goal</button>

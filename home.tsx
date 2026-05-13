@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import './App.css'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import type { UserCredential, User } from 'firebase/auth';
-import {auth} from "./firebase";
+import {setDoc, doc, collection, query, where, getDocs} from 'firebase/firestore'
+import {auth, db} from "./firebase";
 
 
 type ModalType = "login" | "signup" | null;
@@ -51,8 +52,14 @@ function Form({type, onSubmit}: AuthFormProps) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [passwordc, setPasswordc] = useState("");
+  const [formError, setFormError] = useState("")
 
-  const handleSubmit = (e: React.FormEvent) => {e.preventDefault();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (type === "signup" && password != passwordc) {
+      setFormError("Passwords don't match")
+      return;
+    }
     onSubmit({
       email, password, username, passwordc});
     };
@@ -90,7 +97,7 @@ function Form({type, onSubmit}: AuthFormProps) {
       <div className="submitButton">
         <button className = "submitB" >{type === "login" ? "Log In" : "Sign Up"}</button>
       </div>
-
+      <p>{formError}</p>
     </form>
 
   )
@@ -108,12 +115,24 @@ function AuthModal({type, onClose, setUser}: authModalProps) {
         </div>
         <div className ='login'>
         {type === "signup" ? (
-          <Form type={"signup"} onSubmit={(data) => 
+          <Form type={"signup"} onSubmit={async (data) => 
           {setErrorMessage(null);
+          const nameCheck = query(collection(db, "userInfo"), where("username", "==", data.username));
+          const duplicate = await getDocs(nameCheck);
+          if (!duplicate.empty) {
+            setErrorMessage("Username Taken")
+            return;
+          }
           createUserWithEmailAndPassword(auth, data.email, data.password).then((userCredential: UserCredential) => 
           {
           const user = userCredential.user;
           updateProfile(user, {displayName: data.username});
+          setDoc(doc(db, "userInfo", user.uid), {
+            points: 0,
+            userId: user.uid,
+            joinedGroups: [],
+            username: data.username
+          })
           }).catch((error) => {
           const errorMessage = error.message;
           setErrorMessage(errorMessage);                               
@@ -137,11 +156,20 @@ function AuthModal({type, onClose, setUser}: authModalProps) {
           </div>
           <div className='third'>
             <h3> Sign in with Google: </h3>
-            <button className='google' onClick= { () =>
+            <button className='google' onClick= {() =>
             signInWithPopup(auth, provider).then((result) => {
                 const cred = GoogleAuthProvider.credentialFromResult(result);
                 const token = cred?.accessToken;
                 const user = result.user;
+                if (type !== "login") {
+                  setDoc(doc(db, "userInfo", user.uid), {
+                    points: 0,
+                    userId: user.uid,
+                    joinedGroups: [],
+                    username: user.uid
+                })
+                updateProfile(user, {displayName: user.uid});
+                }
             }).catch((error) => {
                 const errormessage = error.message;
             })} >   <img className='google' src = "google.png"></img>  </button>
