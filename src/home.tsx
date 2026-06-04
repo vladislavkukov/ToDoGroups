@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react'
+import {useState } from 'react'
 import './App.css'
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import type { UserCredential, User } from 'firebase/auth';
+import type { UserCredential } from 'firebase/auth';
 import {setDoc, doc, collection, query, where, getDocs} from 'firebase/firestore'
 import {auth, db} from "./firebase";
 import googleLogo from "./google.webp"
@@ -174,8 +174,6 @@ function AuthModal({type, onClose, setUser}: authModalProps) {
             <h3> Sign in with Google: </h3>
             <button className='google' onClick= {() =>
             signInWithPopup(auth, provider).then((result) => {
-                const cred = GoogleAuthProvider.credentialFromResult(result);
-                const token = cred?.accessToken;
                 const user = result.user;
                 // Creates a firestore user doc on sign up oly
                 if (type !== "login") {
@@ -187,9 +185,9 @@ function AuthModal({type, onClose, setUser}: authModalProps) {
                     username: user.uid
                 })
                 updateProfile(user, {displayName: user.uid});
-                }
+}
             }).catch((error) => {
-                const errormessage = error.message;
+              setErrorMessage(error)
             })} >   <img className='google' src = {googleLogo}></img>  </button>
 
           </div>

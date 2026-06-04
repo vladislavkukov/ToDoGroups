@@ -1,13 +1,13 @@
-import { useEffect, useState, type FormEvent, type ChangeEvent, useMemo} from 'react';
-import { addDoc, collection, onSnapshot, query, where, orderBy, doc, deleteDoc, getDocs, getDoc, setDoc, updateDoc, increment, arrayRemove, arrayUnion, Timestamp, limit} from "firebase/firestore";
-import {auth, db} from "./firebase";
+import { useEffect, useState, type ChangeEvent, useMemo} from 'react';
+import { addDoc, collection, onSnapshot, query, orderBy, doc, getDocs, getDoc, updateDoc, increment, arrayRemove, arrayUnion, Timestamp, limit} from "firebase/firestore";
+import {db} from "./firebase";
 import './dash.css';
 import './groups.css'
 
 
 // Function for which group is currently being displayed and return button
 function Groups({changePage, user}: {changePage: (page: "dash" |"groups")=>void; user: any}) {
-    const [curUser, setCurUser] = useState(user);
+    const [curUser] = useState(user);
     // No group displayed when null
     const [curGroup, setCurGroup] = useState<Groups | null>(null);
     return(<div><button className='returndash' onClick={() => changePage("dash")}>Dash</button>

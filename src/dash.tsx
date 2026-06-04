@@ -1,7 +1,7 @@
 import './dash.css';
 import {auth, db} from "./firebase";
 import Groups from "./groups"
-import { useEffect, useState, type FormEvent, type ChangeEvent, use } from 'react';
+import { useEffect, useState, type FormEvent, type ChangeEvent } from 'react';
 import { addDoc, collection, onSnapshot, query, where, orderBy, doc, deleteDoc, getDoc, getDocs, setDoc, updateDoc, increment, arrayRemove, arrayUnion, Timestamp} from "firebase/firestore";
 import { signOut, updateProfile } from "firebase/auth";
 
@@ -58,7 +58,7 @@ function Dash({user, setUser}: {user:any, setUser:any}) {
             {/* Calls other functions which are the main display of the page */}
             <UserInfo user = {user} points = {points} setPoints = {setPoints}/>
             <GoalForm user = {user}/>
-            <Feed user = {user} points = {points} setPoints = {setPoints}/>
+            <Feed user = {user} setPoints = {setPoints}/>
             </div>
             )}
 
@@ -115,7 +115,7 @@ function UserInfo ({user, points, setPoints} : {user:any, points:number|null, se
 }
 
 // Function which displays information about current and past goals. Includes current goals, upcoming takss and completed goals
-function Feed({user, points, setPoints} : {user:any, points:number|null, setPoints:React.Dispatch<React.SetStateAction<number|null>>}){
+function Feed({user, setPoints} : {user:any, setPoints:React.Dispatch<React.SetStateAction<number|null>>}){
 
     const [Selection, changeSelection] = useState('0')
     const [postGroup, changePostGroup] = useState<string>("");
@@ -128,7 +128,7 @@ function Feed({user, points, setPoints} : {user:any, points:number|null, setPoin
     }
 
     // Used when a user marks a task as finished. Increments points, updates list of completed/failed tasks in firestore and marks the goal as complete if it is the final task
-    const handleComplete = async (id: string, end: Date, current: string, change: string) => {
+    const handleComplete = async (id: string, current: string, change: string) => {
         const date = new Date(current);
         const fireDate = Timestamp.fromDate(date);
         const ogCol = doc(db, "goal", id);
@@ -390,7 +390,7 @@ function Feed({user, points, setPoints} : {user:any, points:number|null, setPoin
                             <ul>
                                 {/* List of tasks with users being able to mark today's tasks or past tasks retroactively as failed or complete, future are shown with no buttons */}
                                 {map[date].map(goal => (
-                                    <li className='task' key={goal.id}>{toLocal(new Date(date)) <= today ? (<><b>{goal.goal}</b> <br/> <button className='completebut' onClick = {() => handleComplete(goal.id!, goal.end, date, "c")}>✅ Mark as done</button> <button className='failbut' onClick = {() => handleComplete(goal.id!, goal.end, date, "f")}>❌ Mark as failed</button></>) : <b> {goal.goal} </b>}</li>
+                                    <li className='task' key={goal.id}>{toLocal(new Date(date)) <= today ? (<><b>{goal.goal}</b> <br/> <button className='completebut' onClick = {() => handleComplete(goal.id!, date, "c")}>✅ Mark as done</button> <button className='failbut' onClick = {() => handleComplete(goal.id!, date, "f")}>❌ Mark as failed</button></>) : <b> {goal.goal} </b>}</li>
                                 ))}
                             </ul>
                         </li>
