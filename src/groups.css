@@ -1,0 +1,196 @@
+button.returndash {
+  border:none;
+  color:white;
+  background-color: rgb(67, 111, 147);
+  padding: 1% 1.5%;
+  font-size:40px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 5px;
+  width:15%;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+}
+
+.begtitle {
+    text-align: center;
+    margin-top: 80px;
+    background-color: rgba(200, 245, 243, 0.295);
+    padding:10px;
+    margin-bottom: 0px;
+}
+
+.newgroups{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+    background-color: rgba(132, 178, 221, 0.753);
+    padding: 40px;
+    position: relative;
+}
+
+.newgroups::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 10px;
+  background: #000000;
+  transform: translateX(-50%);
+}
+
+.makejoin {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+
+.creategroup{
+    background-color: rgb(195, 241, 183);
+    padding: 40px;
+    padding-top: 20px;
+    border-radius: 20px;
+}
+
+.joingroup{
+    background-color: rgb(177, 196, 250);
+    padding: 40px;
+    padding-top: 20px;
+    border-radius: 20px;
+}
+.exploregroups {
+    background-color: rgb(255, 227, 190);
+    padding: 60px;
+    text-align: center;
+    padding-top: 30px;
+    overflow-y: auto;
+    border-radius: 10px;
+    min-height: 0;
+    max-height: 600px;
+}
+
+h2 {
+    margin: 10px;
+}
+
+.textzone {
+  resize:none;
+  width:60%;
+  height: 15px;
+  font-size: 20px;
+  padding:10px;
+  border: 2px solid rgb(0, 0, 0);
+  border-radius: 5px;
+  background-color: rgba(54, 49, 47, 0.459);
+  margin: 10px;
+}
+
+.textzone:focus {
+  border: 3px solid rgb(0, 0, 0);
+  background-color: rgba(255, 244, 244, 0.521);
+  outline:none;
+}
+
+button {
+  background-color: rgb(237, 245, 166);
+  font-size: 15px;
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  transition: background-color 0.5s ease, transform 0.5s ease;
+  border-radius: 7px;
+  border-width: 1px;
+  border-color: rgba(0, 0, 0, 0.116);
+  outline:none;
+  margin: 5px;
+
+}
+
+.grouplist {
+    display: flex;
+  flex-direction: row;
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  gap: 16px;
+
+
+}
+
+.groupind {
+    margin:30px;
+    padding: 20px;
+    background-color: #bebaba;
+    border-radius: 10px;
+    min-width: 180px;
+}
+
+.groupcontent {
+    background-color: rgba(189, 198, 240, 0.74);
+}
+
+.chatpost {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+
+}
+
+.chat {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(247, 190, 190);
+    padding-left: 50px;
+    padding-right: 50px;
+    min-width: 350px;
+    min-height: 500px;
+    max-height:500px ;
+    overflow-y: auto;
+    border-radius: 10px;
+    margin:25px;
+}
+
+.postinst{
+    background-color: rgb(138, 197, 182);
+    padding: 30px;
+    padding-left: 100px;
+    padding-right: 100px;
+    margin:20px;
+}
+
+.send {
+    margin-top: auto;
+}
+
+.title {
+    text-align: center;
+}
+
+.groupinfo {
+    text-align: center;
+    padding: 20px;
+}
+
+.viewbut {
+    background-color: rgb(210, 227, 241);
+}
+
+.viewbut:hover {
+    background-color: rgb(199, 211, 221);
+}
+
+.leavejoin {
+    background-color: #ececec;
+}
+
+.leavejoin:hover {
+    background-color: #d3d0d0;
+}
+
+.createjoin {
+    background-color: rgb(221, 241, 205);
+}
+
+.createjoin:hover {
+    background-color: rgb(162, 206, 142);
+}
