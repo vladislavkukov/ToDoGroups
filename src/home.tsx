@@ -24,6 +24,7 @@ function Home({setUser}: HomeProps) {
     <div className='homepage'>
     <div className='mainrows'>
     <h1>A place to make and achieve goals.<br/> By yourself or with the support of others.</h1>
+    <h4>** Note: Google sign-in pop-up does not work in Github Pages **</h4>
     <div className='buttons'>
     {/* Buttons which create relevant modals when butons are clicked */}
     <button className="front" onClick={() => setModalType("login")}>Log in</button>
